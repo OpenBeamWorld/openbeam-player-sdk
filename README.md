@@ -4,6 +4,8 @@ Put the [OpenBeam Cloud](https://cloud.openbeam.world) player in your own web
 app: start a session from your server, mount the player in your page, and
 follow what it is doing.
 
+Guide: [Embed the OpenBeam player in your app](https://openbeam.world/embed-the-player/).
+
 - **Server side** (`OpenBeamClient`): sign a user in, start, list and end
   sessions. Runs anywhere with `fetch`: Node 18+, Deno, Bun, Workers.
 - **Browser side** (`OpenBeamPlayer`): mounts the player in an iframe and
