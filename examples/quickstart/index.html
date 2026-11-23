@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenBeam player in my app</title>
+<style>
+  body { margin: 0; font: 15px system-ui, sans-serif; background: #111; color: #eee; }
+  header { display: flex; gap: 12px; align-items: center; padding: 10px 16px; }
+  button { font: inherit; padding: 6px 14px; }
+  #stage { width: 100vw; height: calc(100vh - 52px); background: #000; }
+</style>
+</head>
+<body>
+<header>
+  <button id="start">Start session</button>
+  <button id="end" disabled>End session</button>
+  <button id="full" disabled>Fullscreen</button>
+  <span id="status">Not started</span>
+</header>
+<div id="stage"></div>
+<script src="/openbeam-player.min.js"></script>
+<script>
+  const status = document.getElementById("status")
+  const start = document.getElementById("start"), end = document.getElementById("end"), full = document.getElementById("full")
+  let player = null, sessionId = null
+
+  start.onclick = async () => {
+    start.disabled = true
+    status.textContent = "Starting a session…"
+    const response = await fetch("/api/session", { method: "POST" })
+    const session = await response.json()
+    if (!response.ok) {
+      status.textContent = "Could not start: " + (session.message || session.error)
+      start.disabled = false
+      return
+    }
+    sessionId = session.sessionId
+    player = OpenBeam.OpenBeamPlayer.mount(document.getElementById("stage"), { playerUrl: session.playerUrl })
+    player.on("state", ({ state, detail }) => { status.textContent = detail ? `${state}: ${detail}` : state })
+    end.disabled = full.disabled = false
+  }
+
+  end.onclick = async () => {
+    end.disabled = full.disabled = true
+    await fetch("/api/session/" + encodeURIComponent(sessionId), { method: "DELETE" })
+    player.destroy()
+    player = null
+    status.textContent = "Ended"
+    start.disabled = false
+  }
+
+  full.onclick = () => player.requestFullscreen()
+</script>
+</body>
+</html>
